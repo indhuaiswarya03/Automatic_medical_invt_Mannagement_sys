@@ -290,7 +290,10 @@ def fill_inventory(inv, f):
     inv.unit = (f.get("unit") or "units").strip()[:30]
     inv.batch_number = (f.get("batch_number") or "").strip()[:60]
     inv.supplier = (f.get("supplier") or "").strip()[:120]
-    inv.expiry_date = to_date(f.get("expiry_date"))
+    expiry_date = to_date(f.get("expiry_date"))
+    if expiry_date and expiry_date <= date.today():
+        raise Bad("Expiry date must be a future date.")
+    inv.expiry_date = expiry_date
     inv.is_cold_chain = f.get("is_cold_chain") == "on"
     if inv.is_cold_chain:
         lo, hi, cur = (float(f.get(k, "")) for k in ("min_temperature", "max_temperature", "current_temperature"))
@@ -584,7 +587,8 @@ def save_item(item):
     except SQLAlchemyError:
         db.session.rollback()
         flash("Unable to update inventory.", "error")
-    return render_template("inventory_form.html", item=item, d=form_data(item, request.form), categories=CATEGORIES)
+    return render_template("inventory_form.html", item=item, d=form_data(item, request.form), categories=CATEGORIES,
+                           min_expiry_date=(date.today() + timedelta(days=1)).isoformat())
 
 
 @app.route("/hospital/inventory/add", methods=["GET", "POST"])
@@ -592,7 +596,8 @@ def save_item(item):
 def inventory_add():
     if request.method == "POST":
         return save_item(None)
-    return render_template("inventory_form.html", item=None, d=form_data(None, None), categories=CATEGORIES)
+    return render_template("inventory_form.html", item=None, d=form_data(None, None), categories=CATEGORIES,
+                           min_expiry_date=(date.today() + timedelta(days=1)).isoformat())
 
 
 @app.route("/hospital/inventory/edit/<int:id>", methods=["GET", "POST"])

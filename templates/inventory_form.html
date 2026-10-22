@@ -6,7 +6,7 @@
 <label>Quantity<input type="number" name="quantity" min="0" value="{{ d.quantity }}" required></label>
 <label>Minimum required quantity<input type="number" name="minimum_quantity" min="1" value="{{ d.minimum_quantity }}" required></label>
 <label>Unit<input name="unit" value="{{ d.unit }}"></label><label>Batch number<input name="batch_number" value="{{ d.batch_number }}"></label>
-<label>Expiry date<input type="date" name="expiry_date" value="{{ d.expiry_date }}"></label><label>Supplier<input name="supplier" value="{{ d.supplier }}"></label>
+<label>Expiry date<input type="date" name="expiry_date" min="{{ min_expiry_date }}" value="{{ d.expiry_date }}"></label><label>Supplier<input name="supplier" value="{{ d.supplier }}"></label>
 <label class="full">Description<textarea name="description" rows="2">{{ d.description }}</textarea></label>
 <label class="full"><input type="checkbox" id="is_cold_chain" name="is_cold_chain" style="width:auto" {{ 'checked' if d.is_cold_chain }}> Cold-chain storage required</label>
 <div class="form-grid full" id="cold-fields"><label>Minimum temperature (°C)<input type="number" step="0.1" name="min_temperature" value="{{ d.min_temperature }}"></label>
