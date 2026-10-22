@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block title %}Supplier Dashboard{% endblock %}
+{% block content %}<h2>Supplier Dashboard</h2>
+<div class="cards">{% for label, n, c in stats %}<div class="stat {{ c }}"><b>{{ n }}</b><span>{{ label }}</span></div>{% endfor %}</div>
+<div class="section-head"><h3>Priority supply alerts</h3><span class="muted">{{ supply_total }} active{% if supply_total > supply|length %}, showing the {{ supply|length }} most urgent{% endif %}. Items matching your categories are listed first within each severity.</span></div>
+<div class="alert-grid">{% for a in supply %}<div class="acard {{ a.sev|lower }}"><div class="ahead">{{ badge(a.sev) }}<span class="muted">{{ a.kind }}</span>{% if a.due %}<span class="chip {{ 'hot' if a.due in ['Overdue','Due today'] }}">{{ a.due }}</span>{% endif %}</div>
+<h4>{{ a.item }}</h4><div class="muted">{{ a.hospital }}</div>
+{% if a.qty %}<div class="need"><b>{{ a.qty }}</b> to supply</div>{% endif %}<p>{{ a.detail }}</p>
+<div class="afoot">{% if a.match %}<span class="chip ok">Matches your categories</span>{% endif %}{% if a.action %}<a class="btn sm" href="{{ url_for('provider_requests') }}">{{ a.action }}</a>{% endif %}</div></div>
+{% else %}<div class="panel">No urgent supply needs right now.</div>{% endfor %}</div>
+<div class="panel"><h3>Available hospital requirements</h3><table><tr><th>Hospital</th><th>Item</th><th>Category</th><th>Still needed</th><th>Priority</th><th>Required by</th></tr>
+{% for r in open_reqs %}<tr class="{{ (r.priority or '')|lower }}"><td>{{ r.hospital.org }}</td><td>{{ r.item_name }}</td><td>{{ r.category }}</td><td>{{ r.shortfall }}</td><td>{{ badge(r.priority) }}</td><td>{{ r.required_by or '' }}</td></tr>{% else %}<tr><td colspan="6">No open requirements.</td></tr>{% endfor %}</table></div>
+<div class="panel"><h3>Recent supply requests</h3><table><tr><th>Hospital</th><th>Item</th><th>Qty</th><th>Priority</th><th>Status</th></tr>
+{% for r in mine %}<tr><td>{{ r.hospital.org }}</td><td>{{ r.item_name }}</td><td>{{ r.requested_quantity }}</td><td>{{ badge(r.priority) }}</td><td>{{ badge(r.status) }}</td></tr>{% else %}<tr><td colspan="5">No requests yet.</td></tr>{% endfor %}</table>
+<p><a class="btn" href="{{ url_for('provider_requests') }}">Manage requests</a></p></div>{% endblock %}

@@ -1,0 +1,6 @@
+{% extends "base.html" %}{% block title %}Alerts{% endblock %}
+{% block content %}<h2>Alerts</h2><form method="post" action="{{ url_for('alerts_read') }}"><button class="btn sec">Mark all as read</button></form><br>
+<div class="panel"><table><tr><th>Severity</th><th>Type</th><th>Message</th><th>Item</th><th>Date</th><th></th></tr>
+{% for a in rows %}<tr style="{{ '' if a.is_read else 'font-weight:600' }}"><td>{{ badge(a.severity) }}</td><td>{{ a.alert_type.replace('_', ' ')|capitalize }}</td><td>{{ a.message }}</td><td>{{ a.inventory.item_name if a.inventory else '' }}</td>
+<td>{{ a.created_at.strftime('%d %b %H:%M') }}</td><td>{% if not a.is_read %}<form method="post" action="{{ url_for('alerts_read') }}"><input type="hidden" name="id" value="{{ a.id }}"><button class="btn sm sec">Mark read</button></form>{% else %}Read{% endif %}</td></tr>
+{% else %}<tr><td colspan="6">No alerts. Stock levels look fine.</td></tr>{% endfor %}</table></div>{% endblock %}

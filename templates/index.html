@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% block title %}Home{% endblock %}
+{% block public %}
+<section class="hero"><div><h1>Smart Medical Inventory Management During Emergencies</h1>
+<p>Monitor critical medical supplies, identify shortages, coordinate suppliers, and protect cold-chain resources.</p>
+<a class="btn" href="{{ url_for('register') }}">Get Started</a><a class="btn sec" href="{{ url_for('login') }}">Login</a></div>
+<div class="panel"><h3>Inventory priority matrix</h3><table><tr><th>Item</th><th>Available</th><th>Minimum</th><th>Priority</th></tr>
+<tr class="normal"><td>Paracetamol</td><td>500</td><td>200</td><td>{{ badge('NORMAL') }}</td></tr>
+<tr class="low"><td>Vaccine</td><td>80</td><td>100</td><td>{{ badge('LOW') }}</td></tr>
+<tr class="critical"><td>Insulin</td><td>20</td><td>100</td><td>{{ badge('CRITICAL') }}</td></tr></table></div></section>
+<section class="sec" id="features"><h2>Features</h2><div class="feats">
+<div class="feat"><h3>Inventory Management</h3>Track stock, batches, expiry and suppliers.</div>
+<div class="feat"><h3>Emergency Requirements</h3>Record urgent needs and shortfalls.</div>
+<div class="feat"><h3>Automatic Priority Detection</h3>Stock at or below half the minimum is critical; at or below the minimum is low.</div>
+<div class="feat"><h3>Supplier Coordination</h3>Send requests; suppliers accept, reject and fulfil.</div>
+<div class="feat"><h3>Cold-Chain Monitoring</h3>Temperature ranges with automatic violation alerts.</div>
+<div class="feat"><h3>Offline Mode</h3>Keep working without a connection; changes sync when it returns.</div></div></section>
+<section class="sec" id="about"><h2>About</h2><p class="muted" style="max-width:42rem">Built for hospitals and medical suppliers only. Hospitals see what is running short, suppliers see what is needed, and administrators oversee the whole system.</p></section>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block title %}Supply Requests{% endblock %}
+{% block content %}<h2>Supply Requests</h2>
+<form class="bar-actions" method="get"><select name="status"><option value="">All statuses</option>{% for s in statuses %}<option {{ 'selected' if st == s }}>{{ s }}</option>{% endfor %}</select><button class="btn">Filter</button></form>
+<div class="panel"><table><tr><th>Hospital</th><th>Item</th><th>Requested</th><th>Priority</th><th>Required by</th><th>Status</th><th>Respond</th></tr>
+{% for r in rows %}<tr><td>{{ r.hospital.org }}</td><td>{{ r.item_name }}</td><td>{{ r.requested_quantity }}<br><small class="muted">supplied {{ r.supplied_quantity or 0 }}</small></td><td>{{ badge(r.priority) }}</td><td>{{ r.required_date or '' }}</td><td>{{ badge(r.status) }}</td>
+<td>{% if r.status in ['PENDING','ACCEPTED','PARTIALLY_FULFILLED'] %}<form method="post" action="{{ url_for('provider_request', id=r.id) }}" style="display:grid;gap:.3rem;min-width:200px">
+<input type="number" name="supplied_quantity" min="0" placeholder="Quantity available"><input name="supplier_response" placeholder="Response note" value="{{ r.supplier_response or '' }}">
+{% if r.status == 'PENDING' %}<span><button class="btn sm" name="action" value="accept">Accept</button> <button class="btn sm danger" name="action" value="reject">Reject</button></span>{% endif %}
+<span><select name="status" style="width:auto"><option value="ACCEPTED">ACCEPTED</option><option value="PARTIALLY_FULFILLED">PARTIALLY_FULFILLED</option><option value="FULFILLED">FULFILLED</option></select> <button class="btn sm sec" name="action" value="update">Update status</button></span></form>
+{% else %}{{ r.supplier_response or 'Closed' }}{% endif %}</td></tr>{% else %}<tr><td colspan="7">No requests found.</td></tr>{% endfor %}</table></div>{% endblock %}

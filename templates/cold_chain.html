@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block title %}Cold Chain{% endblock %}
+{% block content %}<h2>Cold Chain Monitoring</h2>
+<div class="temps">{% for i in items %}<div class="temp {{ i.cold_status }}"><h3>{{ i.item_name }}</h3>
+<div class="deg">{{ '%g'|format(i.current_temperature) if i.current_temperature is not none else '--' }}°C</div>
+<p>Safe range: {{ '%g'|format(i.min_temperature) }}°C to {{ '%g'|format(i.max_temperature) }}°C<br>
+{% if i.cold_status == 'VIOLATION' %}{{ badge('TEMPERATURE VIOLATION') }}{% else %}{{ badge(i.cold_status) }}{% endif %}<br>
+<small class="muted">Last updated: {{ i.temp_updated.strftime('%d %b %H:%M') if i.temp_updated else 'never' }}</small></p>
+<form class="temp" data-id="{{ i.id }}"><input type="number" step="0.1" name="temperature" placeholder="New temperature °C" required><button class="btn sm">Update</button></form></div>
+{% else %}<div class="panel">No cold-chain items. Mark an inventory item as cold-chain to monitor it here.</div>{% endfor %}</div>{% endblock %}

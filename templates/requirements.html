@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block title %}Emergency Requirements{% endblock %}
+{% block content %}<h2>Emergency Requirements</h2><p><a class="btn" href="{{ url_for('requirement_add') }}">New requirement</a></p>
+<div class="panel"><table><tr><th>Item</th><th>Category</th><th>Required</th><th>Available</th><th>Needed</th><th>Priority</th><th>Required by</th><th>Status</th></tr>
+{% for r in reqs %}<tr class="{{ (r.priority or '')|lower }}"><td>{{ r.item_name }}{% if r.description %}<br><small class="muted">{{ r.description }}</small>{% endif %}</td><td>{{ r.category }}</td><td>{{ r.required_quantity }}</td><td>{{ r.current_quantity }}</td>
+<td>{{ r.shortfall }} more</td><td>{{ badge(r.priority) }}</td><td>{{ r.required_by or '' }}</td>
+<td><form method="post" action="{{ url_for('requirement_status', id=r.id) }}" class="qty"><select name="status" style="width:auto">{% for s in statuses %}<option {{ 'selected' if r.status == s }}>{{ s }}</option>{% endfor %}</select><button class="btn sm">Set</button></form></td></tr>
+{% else %}<tr><td colspan="8">No emergency requirements yet.</td></tr>{% endfor %}</table></div>{% endblock %}

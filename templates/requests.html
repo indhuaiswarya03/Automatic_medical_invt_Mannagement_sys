@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block title %}Supply Requests{% endblock %}
+{% block content %}<h2>Supply Requests</h2>
+<form class="panel" method="post"><h3>Send a request to a supplier</h3><div class="form-grid">
+<label>Supplier<select name="supplier_id" required><option value="">Choose supplier</option>{% for s in suppliers %}<option value="{{ s.id }}">{{ s.org }}</option>{% endfor %}</select></label>
+<label>Requirement (optional)<select name="requirement_id"><option value="">None</option>{% for r in reqs %}<option value="{{ r.id }}">{{ r.item_name }} (needs {{ r.shortfall }})</option>{% endfor %}</select></label>
+<label>Item (blank = from requirement)<input name="item_name"></label><label>Quantity (blank = shortfall)<input type="number" name="requested_quantity" min="1"></label>
+<label>Required date<input type="date" name="required_date"></label></div><p><button class="btn">Send request</button></p></form>
+<div class="panel"><table><tr><th>Item</th><th>Supplier</th><th>Requested</th><th>Supplied</th><th>Priority</th><th>Requested on</th><th>Required by</th><th>Status</th><th>Supplier response</th></tr>
+{% for r in rows %}<tr><td>{{ r.item_name }}</td><td>{{ r.supplier.org }}</td><td>{{ r.requested_quantity }}</td><td>{{ r.supplied_quantity or 0 }}</td><td>{{ badge(r.priority) }}</td>
+<td>{{ r.request_date.strftime('%d %b %Y') }}</td><td>{{ r.required_date or '' }}</td><td>{{ badge(r.status) }}</td><td>{{ r.supplier_response or '' }}</td></tr>{% else %}<tr><td colspan="9">No supply requests yet.</td></tr>{% endfor %}</table></div>{% endblock %}

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}MediCrisis{% endblock %} | Medical Inventory Priority Matrix</title>
+<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}"><meta name="theme-color" content="#0b1416">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"></head>
+<body data-role="{{ user.role if user else '' }}">
+{% if user %}
+<div class="shell"><aside class="side"><a class="brand" href="{{ url_for('index') }}">Medical Inventory Priority Matrix</a>
+<nav>{% for label, ep in nav %}<a href="{{ url_for(ep) }}" class="{{ 'on' if request.endpoint == ep }}">{{ label }}{% if ep == 'alerts' and unread %}<span class="count">{{ unread }}</span>{% endif %}</a>{% endfor %}
+<a href="{{ url_for('logout') }}" data-logout>Logout</a></nav></aside>
+<div class="main"><header class="top"><span id="net" class="net on">ONLINE</span><span id="pending" class="muted"></span><span class="who">{{ user.org }} ({{ user.role }})</span></header>
+<main>{% with m = get_flashed_messages(with_categories=true) %}{% for c, t in m %}<div class="flash {{ c }}">{{ t }}</div>{% endfor %}{% endwith %}
+{% block content %}{% endblock %}</main></div></div>
+{% else %}
+<header class="pub"><a class="brand" href="{{ url_for('index') }}"><b>+</b> MediCrisis</a>
+<nav><a href="{{ url_for('index') }}">Home</a><a href="{{ url_for('index') }}#about">About</a><a href="{{ url_for('index') }}#features">Features</a>
+<a href="{{ url_for('login') }}">Login</a><a class="btn" href="{{ url_for('register') }}">Register</a></nav></header>
+{% with m = get_flashed_messages(with_categories=true) %}{% if m %}<div class="auth" style="margin:1rem auto 0">{% for c, t in m %}<div class="flash {{ c }}">{{ t }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+{% block public %}{% endblock %}
+{% endif %}
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body></html>

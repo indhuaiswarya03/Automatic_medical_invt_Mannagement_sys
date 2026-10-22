@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% block title %}Inter-Hospital Sharing{% endblock %}
+{% block content %}<h2>Inter-Hospital Sharing</h2>
+<div class="panel"><h3>Send a sharing request</h3>
+{% if hospitals %}<form method="get" class="form-grid"><label>Providing hospital<select name="provider_id" required><option value="">Choose hospital</option>{% for h in hospitals %}<option value="{{ h.id }}" {{ 'selected' if selected_provider and selected_provider.id == h.id }}>{{ h.org }}</option>{% endfor %}</select></label><div class="full"><button class="btn sec">Show available items</button></div></form>
+{% if selected_provider %}{% if inventory_options %}<form method="post"><input type="hidden" name="action" value="create"><input type="hidden" name="provider_hospital_id" value="{{ selected_provider.id }}"><div class="form-grid">
+<label>Available inventory item<select name="source_inventory_id" required><option value="">Choose inventory item</option>{% for i in inventory_options %}<option value="{{ i.id }}">{{ i.item_name }} ({{ i.quantity }} {{ i.unit or 'units' }}){% if i.batch_number %} ? batch {{ i.batch_number }}{% endif %}</option>{% endfor %}</select></label>
+<label>Quantity needed<input type="number" name="requested_quantity" min="1" required></label>
+<label>Priority<select name="priority"><option value="NORMAL">Normal</option><option value="LOW">Low</option><option value="CRITICAL">Critical</option></select></label>
+<label class="full">Reason<textarea name="reason" rows="3" minlength="3" maxlength="2000" required></textarea></label></div><p><button class="btn">Send sharing request</button></p></form>
+{% else %}<p class="muted">That hospital has no inventory currently available for sharing.</p>{% endif %}{% endif %}
+{% else %}<p class="muted">No other hospital accounts are available.</p>{% endif %}</div>
+<div class="panel"><h3>Incoming requests</h3><table><tr><th>Requesting hospital</th><th>Item</th><th>Quantity</th><th>Reason</th><th>Priority</th><th>Requested</th><th>Status / action</th></tr>
+{% for r in incoming %}<tr><td>{{ r.requester.org }}</td><td>{{ r.item_name }}<br><small class="muted">{{ r.category }}{% if r.batch_number %} ? batch {{ r.batch_number }}{% endif %}</small></td><td>{{ r.requested_quantity }} {{ r.unit or 'units' }}</td><td>{{ r.reason }}</td><td>{{ badge(r.priority) }}</td><td>{{ r.created_at.strftime('%d %b %Y %H:%M') }}</td><td>{% if r.status == 'PENDING' %}<form method="post" class="qty"><input type="hidden" name="request_id" value="{{ r.id }}"><button class="btn sm" name="action" value="accept">Accept and transfer</button><button class="btn sm danger" name="action" value="reject">Reject</button></form>{% else %}{{ badge(r.status) }}{% if r.responded_at %}<br><small>{{ r.responded_at.strftime('%d %b %Y %H:%M') }}</small>{% endif %}{% endif %}</td></tr>
+{% else %}<tr><td colspan="7">No incoming sharing requests.</td></tr>{% endfor %}</table></div>
+<div class="panel"><h3>My sent requests</h3><table><tr><th>Providing hospital</th><th>Item</th><th>Quantity</th><th>Reason</th><th>Priority</th><th>Requested</th><th>Status</th></tr>
+{% for r in sent %}<tr><td>{{ r.provider.org }}</td><td>{{ r.item_name }}{% if r.batch_number %}<br><small class="muted">Batch {{ r.batch_number }}</small>{% endif %}</td><td>{{ r.requested_quantity }} {{ r.unit or 'units' }}</td><td>{{ r.reason }}</td><td>{{ badge(r.priority) }}</td><td>{{ r.created_at.strftime('%d %b %Y %H:%M') }}</td><td>{{ badge(r.status) }}</td></tr>
+{% else %}<tr><td colspan="7">No sent sharing requests.</td></tr>{% endfor %}</table></div>
+{% endblock %}

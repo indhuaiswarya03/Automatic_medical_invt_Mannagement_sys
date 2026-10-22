@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block title %}Profile{% endblock %}
+{% block content %}<h2>Profile</h2><form class="panel" method="post"><div class="form-grid">
+<label>Organization<input name="organization_name" value="{{ user.organization_name or '' }}"></label><label>Full name<input name="name" value="{{ user.name }}"></label>
+<label>Email<input value="{{ user.email }}" disabled></label><label>Phone<input name="phone" value="{{ user.phone or '' }}"></label>
+<label class="full">Address<input name="address" value="{{ user.address or '' }}"></label>
+{% if user.categories %}<label class="full">Supply categories<input value="{{ user.categories }}" disabled></label>{% endif %}
+<label>New password (optional)<input type="password" name="password"></label><label>Confirm new password<input type="password" name="confirm_password"></label></div>
+<p><button class="btn">Save profile</button></p></form>{% endblock %}

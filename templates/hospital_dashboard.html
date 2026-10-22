@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block title %}{{ 'Reports' if report else 'Dashboard' }}{% endblock %}
+{% block content %}
+<h2>{{ 'Reports' if report else 'Hospital Dashboard' }}</h2>
+{% if report %}<p><button class="btn sec" onclick="window.print()">Print report</button></p>{% endif %}
+<div class="cards">{% for label, n, c in stats %}<div class="stat {{ c }}"><b>{{ n }}</b><span>{{ label }}</span></div>{% endfor %}</div>
+<div class="charts">{% for title, parts in charts %}<div class="panel"><h3>{{ title }}</h3><div class="bar">{% for l, v, c in parts %}{% if v %}<i class="{{ c }}" style="flex:{{ v }}"></i>{% endif %}{% endfor %}</div>
+<ul class="legend">{% for l, v, c in parts %}<li><b class="dot {{ c }}"></b>{{ l }} {{ v }}</li>{% endfor %}</ul></div>{% endfor %}</div>
+<div class="panel"><h3>Inventory Priority Matrix</h3><table><tr><th>Item</th><th>Category</th><th>Available</th><th>Minimum</th><th>Stock</th><th>Status</th><th>Priority</th></tr>
+{% for i in (inv if report else inv[:12]) %}<tr class="{{ i.priority|lower }}"><td>{{ i.item_name }}</td><td>{{ i.category }}</td><td>{{ i.quantity }}</td><td>{{ i.minimum_quantity }}</td>
+<td><span class="meter"><i class="{{ i.priority|lower }}" style="width:{{ [i.pct,100]|min }}%"></i></span>{{ i.pct }}%</td>
+<td>{{ i.priority|capitalize }}</td><td>{{ badge(i.priority) }}</td></tr>{% else %}<tr><td colspan="7">No inventory yet. <a href="{{ url_for('inventory_add') }}">Add your first item</a>.</td></tr>{% endfor %}</table></div>
+{% if report %}<div class="panel"><h3>Emergency requirements</h3><table><tr><th>Item</th><th>Required</th><th>Available</th><th>Shortfall</th><th>Priority</th><th>Status</th></tr>
+{% for r in reqs %}<tr><td>{{ r.item_name }}</td><td>{{ r.required_quantity }}</td><td>{{ r.current_quantity }}</td><td>{{ r.shortfall }}</td><td>{{ badge(r.priority) }}</td><td>{{ badge(r.status) }}</td></tr>{% else %}<tr><td colspan="6">No requirements.</td></tr>{% endfor %}</table></div>{% endif %}
+{% endblock %}

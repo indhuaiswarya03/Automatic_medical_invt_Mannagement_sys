@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block title %}Register{% endblock %}
+{% block public %}<div class="auth"><form class="panel" method="post"><h2>Create an account</h2>
+<label>Role<select name="role" id="role"><option value="hospital">Hospital</option><option value="provider">Supplier / Provider</option></select></label>
+<label><span id="orgl">Hospital name</span><input name="organization_name" required></label>
+<label>Full name<input name="name" required></label>
+<label>Email<input type="email" name="email" required></label>
+<label>Contact number<input name="phone" required></label>
+<label><span id="addl">Hospital address</span><input name="address" required></label>
+<label id="catl" hidden>Medical supply categories<input name="categories" placeholder="e.g. Medicines, Oxygen, Vaccines"></label>
+<label>Password<input type="password" name="password" minlength="6" required></label>
+<label>Confirm password<input type="password" name="confirm_password" required></label>
+<button class="btn">Register</button> <a class="btn sec" href="{{ url_for('login') }}">Login</a></form></div>
+<script>const r=document.getElementById("role");r.onchange=()=>{const p=r.value==="provider";orgl.textContent=p?"Supplier / company name":"Hospital name";addl.textContent=p?"Address":"Hospital address";catl.hidden=!p};</script>{% endblock %}

@@ -1,0 +1,6 @@
+{% extends "base.html" %}{% block title %}Login{% endblock %}
+{% block public %}<div class="auth"><form class="panel" method="post"><h2>Log in</h2>
+<label>Email<input type="email" name="email" required></label>
+<label>Password<input type="password" name="password" required></label>
+<label>Role<select name="role"><option value="hospital">Hospital</option><option value="provider">Supplier / Provider</option><option value="admin">Admin</option></select></label>
+<button class="btn">Login</button> <a class="btn sec" href="{{ url_for('register') }}">Register</a></form></div>{% endblock %}
