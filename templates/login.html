@@ -1,6 +1,6 @@
-{% extends "base.html" %}{% block title %}Login{% endblock %}
-{% block public %}<div class="auth"><form class="panel" method="post"><h2>Log in</h2>
-<label>Email<input type="email" name="email" required></label>
-<label>Password<input type="password" name="password" required></label>
+﻿{% extends "base.html" %}{% block title %}Login{% endblock %}
+{% block public %}<div class="auth"><div class="auth-layout"><section class="auth-intro"><div class="auth-mark">+</div><h1>MediCrisis</h1><p>Medical Inventory Priority Matrix</p><p>Coordinate essential supplies, respond to shortages, and support timely care across your healthcare network.</p></section><form class="auth-form" method="post"><h2>Welcome back</h2><p class="subtitle">Log in to your account to continue.</p>
+<label>Email<input type="email" name="email" autocomplete="username" required></label>
+<label>Password<input type="password" name="password" autocomplete="current-password" required></label>
 <label>Role<select name="role"><option value="hospital">Hospital</option><option value="provider">Supplier / Provider</option><option value="admin">Admin</option></select></label>
-<button class="btn">Login</button> <a class="btn sec" href="{{ url_for('register') }}">Register</a></form></div>{% endblock %}
+<button class="btn" type="submit">Login</button><p class="auth-links">New to MediCrisis? <a href="{{ url_for('register') }}">Sign Up</a></p></form></div></div>{% endblock %}

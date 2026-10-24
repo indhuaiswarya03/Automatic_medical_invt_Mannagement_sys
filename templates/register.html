@@ -1,13 +1,68 @@
 {% extends "base.html" %}{% block title %}Register{% endblock %}
-{% block public %}<div class="auth"><form class="panel" method="post"><h2>Create an account</h2>
-<label>Role<select name="role" id="role"><option value="hospital">Hospital</option><option value="provider">Supplier / Provider</option></select></label>
-<label><span id="orgl">Hospital name</span><input name="organization_name" required></label>
-<label>Full name<input name="name" required></label>
-<label>Email<input type="email" name="email" required></label>
-<label>Contact number<input name="phone" required></label>
-<label><span id="addl">Hospital address</span><input name="address" required></label>
-<label id="catl" hidden>Medical supply categories<input name="categories" placeholder="e.g. Medicines, Oxygen, Vaccines"></label>
-<label>Password<input type="password" name="password" minlength="6" required></label>
-<label>Confirm password<input type="password" name="confirm_password" required></label>
-<button class="btn">Register</button> <a class="btn sec" href="{{ url_for('login') }}">Login</a></form></div>
-<script>const r=document.getElementById("role");r.onchange=()=>{const p=r.value==="provider";orgl.textContent=p?"Supplier / company name":"Hospital name";addl.textContent=p?"Address":"Hospital address";catl.hidden=!p};</script>{% endblock %}
+{% block public %}
+<div class="auth">
+  <div class="auth-layout">
+    <section class="auth-intro">
+      <div class="auth-mark">+</div>
+      <h1>Join MediCrisis</h1>
+      <p>Decentralized Medical Inventory & Crisis Response System</p>
+      <p>Connect your healthcare institution or supply distribution network to manage emergency quotas, real-time stock matrix, and cold-chain monitoring.</p>
+      <div style="margin-top:2rem;display:flex;flex-direction:column;gap:0.75rem;font-size:0.88rem;color:var(--muted);">
+        <div style="display:flex;align-items:center;gap:0.5rem;"><span style="color:var(--acc);">✔</span> Real-time AI Shortfall Detection</div>
+        <div style="display:flex;align-items:center;gap:0.5rem;"><span style="color:var(--acc);">✔</span> Inter-Hospital Emergency Sharing</div>
+        <div style="display:flex;align-items:center;gap:0.5rem;"><span style="color:var(--acc);">✔</span> IoT Cold-Chain Temperature Sensors</div>
+      </div>
+    </section>
+    <form class="auth-form" method="post">
+      <h2>Create an Account</h2>
+      <p class="subtitle">Enter your organization details to register.</p>
+      <label>Account Role
+        <select name="role" id="role">
+          <option value="hospital">Hospital / Medical Center</option>
+          <option value="provider">Supplier / Logistics Provider</option>
+        </select>
+      </label>
+      <label><span id="orgl">Hospital Name</span>
+        <input name="organization_name" placeholder="e.g. St. Jude General Hospital" required>
+      </label>
+      <label>Contact Full Name
+        <input name="name" placeholder="Dr. Sarah Connor" required>
+      </label>
+      <label>Email Address
+        <input type="email" name="email" placeholder="sarah@hospital.org" autocomplete="username" required>
+      </label>
+      <label>Contact Phone Number
+        <input name="phone" placeholder="+1 (555) 019-2834" required>
+      </label>
+      <label><span id="addl">Facility Address</span>
+        <input name="address" placeholder="104 Medical Plaza, New York, NY" required>
+      </label>
+      <label id="catl" hidden>Medical Supply Categories
+        <input name="categories" placeholder="e.g. Medicines, Oxygen, Vaccines, PPE">
+      </label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.85rem;">
+        <label>Password
+          <input type="password" name="password" minlength="6" autocomplete="new-password" required>
+        </label>
+        <label>Confirm Password
+          <input type="password" name="confirm_password" autocomplete="new-password" required>
+        </label>
+      </div>
+      <button class="btn" type="submit" style="margin-top:0.5rem;">Register Account</button>
+      <p class="auth-links">Already registered? <a href="{{ url_for('login') }}">Sign In</a></p>
+    </form>
+  </div>
+</div>
+<script>
+  const r = document.getElementById("role");
+  const orgl = document.getElementById("orgl");
+  const addl = document.getElementById("addl");
+  const catl = document.getElementById("catl");
+  r.onchange = () => {
+    const isProvider = r.value === "provider";
+    orgl.textContent = isProvider ? "Supplier / Company Name" : "Hospital Name";
+    addl.textContent = isProvider ? "Warehouse / Office Address" : "Facility Address";
+    catl.hidden = !isProvider;
+  };
+</script>
+{% endblock %}

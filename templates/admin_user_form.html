@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block title %}Edit User{% endblock %}
+{% block content %}<h2>Edit user account</h2><form class="panel" method="post"><div class="form-grid">
+<label>Organization<input name="organization_name" value="{{ account.organization_name or '' }}" required maxlength="150"></label>
+<label>Full name<input name="name" value="{{ account.name }}" required maxlength="120"></label>
+<label>Email<input type="email" name="email" value="{{ account.email }}" required maxlength="120"></label>
+<label>Role<select name="role"><option value="hospital" {{ 'selected' if account.role == 'hospital' }}>Hospital</option><option value="provider" {{ 'selected' if account.role == 'provider' }}>Supplier</option></select></label>
+<label>Phone<input name="phone" value="{{ account.phone or '' }}" maxlength="30"></label><label>Address<input name="address" value="{{ account.address or '' }}" maxlength="255"></label>
+<label>Supplier categories (required for suppliers)<input name="categories" value="{{ account.categories or '' }}" maxlength="255"></label>
+<label>New password (leave blank to keep current)<input type="password" name="password" minlength="6"></label></div>
+<p><button class="btn">Save account</button> <a class="btn sec" href="{{ url_for('admin_users') }}">Back to users</a></p></form>{% endblock %}

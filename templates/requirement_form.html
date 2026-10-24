@@ -1,11 +1,11 @@
-{% extends "base.html" %}{% block title %}New requirement{% endblock %}
-{% block content %}<h2>New emergency requirement</h2>
+{% extends "base.html" %}{% block title %}{{ "Edit requirement" if editing else "New requirement" }}{% endblock %}
+{% block content %}<h2>{{ "Edit emergency requirement" if editing else "New emergency requirement" }}</h2>
 <form class="panel" method="post" id="req-form"><div class="form-grid">
 <label>Item name<input name="item_name" value="{{ d.item_name }}" required></label>
 <label>Category<select name="category">{% for c in categories %}<option {{ 'selected' if d.category == c }}>{{ c }}</option>{% endfor %}</select></label>
 <label>Required quantity<input type="number" name="required_quantity" min="1" value="{{ d.required_quantity }}" required></label>
 <label>Current quantity (blank = use inventory)<input type="number" name="current_quantity" min="0" value="{{ d.current_quantity }}"></label>
-<label>Required by<input type="date" name="required_by" value="{{ d.required_by }}"></label>
+<label>Required by<input type="date" name="required_by" min="{{ min_date or today() }}" value="{{ d.required_by }}"></label>
 <label>Status<select name="status">{% for s in statuses %}<option {{ 'selected' if d.status == s }}>{{ s }}</option>{% endfor %}</select></label>
 <label class="full">Emergency description<textarea name="description" rows="3">{{ d.description }}</textarea></label></div>
-<p>Priority is calculated automatically from current and required quantity.</p><button class="btn">Save requirement</button> <a class="btn sec" href="{{ url_for('requirements') }}">Cancel</a></form>{% endblock %}
+<p>Priority is calculated automatically from current and required quantity.</p><button class="btn">{{ "Save changes" if editing else "Save requirement" }}</button> <a class="btn sec" href="{{ url_for('requirements') }}">Cancel</a></form>{% endblock %}

@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block title %}Edit supply request{% endblock %}
+{% block content %}<h2>Edit pending supply request</h2><form class="panel" method="post"><div class="form-grid">
+<label>Supplier<select name="supplier_id" required>{% for s in suppliers %}<option value="{{ s.id }}" {{ "selected" if r.supplier_id == s.id }}>{{ s.org }}</option>{% endfor %}</select></label>
+<label>Item<input name="item_name" value="{{ request.form.get("item_name", r.item_name) }}" {% if r.requirement_id %}readonly{% endif %} required></label>
+<label>Quantity<input type="number" name="requested_quantity" min="1" value="{{ request.form.get("requested_quantity", r.requested_quantity) }}" required></label>
+<label>Required date<input type="date" name="required_date" value="{{ request.form.get("required_date", r.required_date or "") }}"></label></div>
+<p><button class="btn" type="submit">Save changes</button> <a class="btn sec" href="{{ url_for("requests_page") }}">Back</a></p></form>{% endblock %}

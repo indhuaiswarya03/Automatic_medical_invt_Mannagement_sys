@@ -1,7 +1,5 @@
-{% extends "base.html" %}{% block title %}Admin{% endblock %}
+{% extends "base.html" %}{% block title %}Admin Dashboard{% endblock %}
 {% block content %}<h2>Admin Dashboard</h2>
 <div class="cards">{% for label, n, c in stats %}<div class="stat {{ c }}"><b>{{ n }}</b><span>{{ label }}</span></div>{% endfor %}</div>
-<p class="muted">Manage inventory, requirements, requests and alerts for all hospitals from the sidebar.</p>
-<div class="panel"><h3>Users, hospitals and suppliers</h3><table><tr><th>Organization</th><th>Name</th><th>Email</th><th>Role</th><th>Phone</th><th>Joined</th><th></th></tr>
-{% for u in users %}<tr><td>{{ u.org }}</td><td>{{ u.name }}</td><td>{{ u.email }}</td><td>{{ badge(u.role) }}</td><td>{{ u.phone or '' }}</td><td>{{ u.created_at.strftime('%d %b %Y') if u.created_at }}</td>
-<td>{% if u.id != user.id %}<form method="post" action="{{ url_for('admin_delete_user', id=u.id) }}" onsubmit="return confirm('Delete this user and all of their records?')"><button class="btn sm danger">Delete</button></form>{% endif %}</td></tr>{% endfor %}</table></div>{% endblock %}
+<div class="panel"><h3>Monitoring</h3><p>Use the dashboards to review hospital inventory and supplier activity. Manage accounts from User Management.</p>
+<div class="bar-actions"><a class="btn" href="{{ url_for('hospital_dashboard') }}">Hospital Dashboard</a><a class="btn" href="{{ url_for('provider_dashboard') }}">Supplier Dashboard</a><a class="btn" href="{{ url_for('admin_supplier_requests') }}">Supplier Requests</a><a class="btn" href="{{ url_for('admin_sharing_requests') }}">Inter-Hospital Sharing</a><a class="btn" href="{{ url_for('admin_users') }}">User Management</a></div></div>{% endblock %}

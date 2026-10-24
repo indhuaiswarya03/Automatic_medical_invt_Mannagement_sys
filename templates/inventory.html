@@ -6,11 +6,13 @@
 <select name="sort"><option value="">Sort by name</option><option value="qty_asc" {{ 'selected' if f.sort == 'qty_asc' }}>Quantity: low to high</option><option value="qty_desc" {{ 'selected' if f.sort == 'qty_desc' }}>Quantity: high to low</option></select>
 <button class="btn">Apply</button><a class="btn sec" href="{{ url_for('inventory_add') }}">Add item</a></form>
 <div class="panel" id="offline-cache" hidden><h3>Offline: last synced inventory</h3><table><thead><tr><th>Item</th><th>Category</th><th>Quantity</th><th>Minimum</th><th>Priority</th></tr></thead><tbody></tbody></table></div>
-<div class="panel"><table><tr><th>Item</th><th>Category</th><th>Quantity</th><th>Minimum</th><th>Stock</th><th>Priority</th><th>Cold chain</th><th>Expiry</th><th></th></tr>
-{% for i in items %}<tr class="{{ i.priority|lower }}"><td>{{ i.item_name }}{% if user.role == 'admin' %}<br><small class="muted">{{ i.hospital.org }}</small>{% endif %}</td><td>{{ i.category }}</td>
-<td><form class="qty" data-id="{{ i.id }}"><input type="number" name="quantity" min="0" value="{{ i.quantity }}" aria-label="Quantity"><button class="btn sm">Update</button></form> <small class="muted">{{ i.unit }}</small></td>
-<td>{{ i.minimum_quantity }}</td><td><span class="meter"><i class="{{ i.priority|lower }}" style="width:{{ [i.pct,100]|min }}%"></i></span>{{ i.pct }}%</td><td>{{ badge(i.priority) }}</td>
-<td>{% if i.is_cold_chain %}{{ badge(i.cold_status) }}{% else %}<span class="muted">No</span>{% endif %}</td><td>{{ i.expiry_date or '' }}</td>
-<td><a class="btn sm sec" href="{{ url_for('inventory_edit', id=i.id) }}">Edit</a>
+<div class="panel"><table><tr><th>Item</th><th>Category</th><th>Quantity</th><th>Minimum</th><th>Stock</th><th>Priority & Reason</th><th>Cold chain</th><th>Expiry Status</th><th></th></tr>
+{% for i in items %}<tr class="{{ i.priority|lower }}"><td><b>{{ i.item_name }}</b>{% if user.role == 'admin' %}<br><small class="muted">{{ i.hospital.org }}</small>{% endif %}</td><td>{{ i.category }}</td>
+<td><form class="qty" data-id="{{ i.id }}"><input type="number" name="quantity" min="0" value="{{ i.quantity }}" aria-label="Quantity"><button class="btn sm update">Update</button></form> <small class="muted">{{ i.unit }}</small></td>
+<td>{{ i.minimum_quantity }}</td><td><span class="meter"><i class="{{ i.priority|lower }}" style="width:{{ [i.pct,100]|min }}%"></i></span>{{ i.pct }}%</td>
+<td>{{ badge(i.priority) }}<br><small class="muted">{{ i.priority_reason }}</small></td>
+<td>{% if i.is_cold_chain %}{{ badge(i.cold_status) }}{% else %}<span class="muted">No</span>{% endif %}</td>
+<td>{% if i.is_expired %}<span class="badge critical">EXPIRED ({{ i.expiry_date }})</span>{% elif i.is_near_expiry %}<span class="badge low">Near Expiry ({{ i.expiry_date }})</span>{% else %}{{ i.expiry_date or 'No expiry' }}{% endif %}</td>
+<td><a class="btn sm update" href="{{ url_for('inventory_edit', id=i.id) }}">Edit</a>
 <form method="post" action="{{ url_for('inventory_delete', id=i.id) }}" style="display:inline" onsubmit="return confirm('Delete {{ i.item_name|e }}?')"><button class="btn sm danger">Delete</button></form></td></tr>
 {% else %}<tr><td colspan="9">No items match. <a href="{{ url_for('inventory_add') }}">Add an item</a>.</td></tr>{% endfor %}</table></div>{% endblock %}

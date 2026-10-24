@@ -1,18 +1,122 @@
-{% extends "base.html" %}{% block title %}Home{% endblock %}
+{% extends "base.html" %}
+{% block title %}Next-Gen Medical Crisis Inventory{% endblock %}
 {% block public %}
-<section class="hero"><div><h1>Smart Medical Inventory Management During Emergencies</h1>
-<p>Monitor critical medical supplies, identify shortages, coordinate suppliers, and protect cold-chain resources.</p>
-<a class="btn" href="{{ url_for('register') }}">Get Started</a><a class="btn sec" href="{{ url_for('login') }}">Login</a></div>
-<div class="panel"><h3>Inventory priority matrix</h3><table><tr><th>Item</th><th>Available</th><th>Minimum</th><th>Priority</th></tr>
-<tr class="normal"><td>Paracetamol</td><td>500</td><td>200</td><td>{{ badge('NORMAL') }}</td></tr>
-<tr class="low"><td>Vaccine</td><td>80</td><td>100</td><td>{{ badge('LOW') }}</td></tr>
-<tr class="critical"><td>Insulin</td><td>20</td><td>100</td><td>{{ badge('CRITICAL') }}</td></tr></table></div></section>
-<section class="sec" id="features"><h2>Features</h2><div class="feats">
-<div class="feat"><h3>Inventory Management</h3>Track stock, batches, expiry and suppliers.</div>
-<div class="feat"><h3>Emergency Requirements</h3>Record urgent needs and shortfalls.</div>
-<div class="feat"><h3>Automatic Priority Detection</h3>Stock at or below half the minimum is critical; at or below the minimum is low.</div>
-<div class="feat"><h3>Supplier Coordination</h3>Send requests; suppliers accept, reject and fulfil.</div>
-<div class="feat"><h3>Cold-Chain Monitoring</h3>Temperature ranges with automatic violation alerts.</div>
-<div class="feat"><h3>Offline Mode</h3>Keep working without a connection; changes sync when it returns.</div></div></section>
-<section class="sec" id="about"><h2>About</h2><p class="muted" style="max-width:42rem">Built for hospitals and medical suppliers only. Hospitals see what is running short, suppliers see what is needed, and administrators oversee the whole system.</p></section>
+<section class="hero">
+  <div>
+    <div class="hero-pill">⚡ Real-Time Crisis Medical Intelligence</div>
+    <h1>Autonomous Medical Inventory & Priority Matrix</h1>
+    <p>Predict shortages, automate emergency hospital allocations, protect cold-chain vaccines, and coordinate supplier supply-chains in zero-latency crisis conditions.</p>
+    <div class="hero-actions">
+      <a class="btn" href="{{ url_for('register') }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+        <span>Initialize Hospital Portal</span>
+      </a>
+      <a class="btn sec" href="{{ url_for('login') }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+        <span>Secure Login</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-3d-wrapper">
+    <!-- Interactive 3D Canvas -->
+    <div id="hero-3d-canvas-container" style="position:relative; width:100%; height:320px; border-radius: var(--radius-lg); overflow:hidden; background: radial-gradient(circle at center, rgba(6, 182, 212, 0.15) 0%, rgba(15, 23, 42, 0.6) 80%); border: 1px solid rgba(6, 182, 212, 0.35); box-shadow: 0 0 40px rgba(6, 182, 212, 0.25);">
+      <canvas id="hero-3d-canvas" style="width:100%; height:100%; display:block;"></canvas>
+      <div style="position:absolute; bottom:12px; left:16px; font-size:0.75rem; color:var(--acc); font-family:var(--font-mono); letter-spacing:0.05em; display:flex; align-items:center; gap:6px;">
+        <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#06b6d4; box-shadow:0 0 8px #06b6d4; animation:pulse-dot 1.5s infinite;"></span>
+        INTERACTIVE 3D CRISIS SHIELD (ROTATE WITH MOUSE)
+      </div>
+    </div>
+
+    <!-- Live Floating Hologram Card -->
+    <div class="panel" style="margin-top:1.25rem; margin-bottom:0;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+        <h3 style="margin:0; font-size:1.05rem;">Live Triaging Matrix</h3>
+        <span class="chip ok">LIVE MONITOR</span>
+      </div>
+      <table>
+        <tr>
+          <th>Critical Item</th>
+          <th>Available</th>
+          <th>Minimum</th>
+          <th>Priority Status</th>
+        </tr>
+        <tr class="critical">
+          <td><b>Oxygen Cylinder (High-Purity)</b></td>
+          <td>20 units</td>
+          <td>100 units</td>
+          <td>{{ badge('CRITICAL') }}</td>
+        </tr>
+        <tr class="low">
+          <td><b>Insulin Glargine Vials</b></td>
+          <td>80 units</td>
+          <td>100 units</td>
+          <td>{{ badge('LOW') }}</td>
+        </tr>
+        <tr class="normal">
+          <td><b>Paracetamol 500mg IV</b></td>
+          <td>500 units</td>
+          <td>200 units</td>
+          <td>{{ badge('NORMAL') }}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Features Grid -->
+<section class="sec" id="features">
+  <h2>Architected for Extreme Crisis Resilience</h2>
+  <div class="feats">
+    <div class="feat">
+      <div class="feat-icon">🏥</div>
+      <h3>Automated Triage Matrix</h3>
+      <p>Instant shortfall and priority calculation. Stock below 50% automatically triggers emergency tier alerts across district hospitals.</p>
+    </div>
+
+    <div class="feat" data-tilt>
+      <div class="feat-icon">❄️</div>
+      <h3>Cold-Chain Surveillance</h3>
+      <p>Precision real-time temperature tracking for biologicals and mRNA vaccines with automated breach warning protocols.</p>
+    </div>
+
+    <div class="feat" data-tilt>
+      <div class="feat-icon">🔄</div>
+      <h3>Inter-Hospital Stock Exchange</h3>
+      <p>Seamless lateral transfer requests between facilities before external suppliers are engaged to eliminate zero-stock fatalities.</p>
+    </div>
+
+    <div class="feat" data-tilt>
+      <div class="feat-icon">🚚</div>
+      <h3>Supplier Orchestration</h3>
+      <p>Automated requisition routing with guaranteed acceptance timeouts and real-time fulfillment tracking.</p>
+    </div>
+
+    <div class="feat" data-tilt>
+      <div class="feat-icon">📡</div>
+      <h3>Offline-First Architecture</h3>
+      <p>Full operational resilience during catastrophic grid or internet failures. Locally caches actions and automatically syncs upon reconnection.</p>
+    </div>
+
+    <div class="feat" data-tilt>
+      <div class="feat-icon">🛡️</div>
+      <h3>Role-Segregated Audits</h3>
+      <p>Military-grade separation of concerns between hospital triage directors, emergency suppliers, and administrative state overseers.</p>
+    </div>
+  </div>
+</section>
+
+<!-- About Section -->
+<section class="sec" id="about" style="border-top:1px solid var(--line);">
+  <div style="max-width:800px; margin:0 auto; text-align:center;">
+    <h2>High-Availability Emergency Network</h2>
+    <p class="muted" style="font-size:1.1rem; line-height:1.7;">
+      MediCrisis is engineered exclusively for accredited medical institutions, trauma centers, and certified pharmaceutical distributors. Built to guarantee transparent allocation, prevent hoarding, and deliver life-saving supplies under severe crisis conditions.
+    </p>
+    <div style="display:flex; justify-content:center; gap:1.25rem; margin-top:2rem;">
+      <a class="btn" href="{{ url_for('register') }}">Join Medical Network</a>
+      <a class="btn sec" href="{{ url_for('login') }}">Access Console</a>
+    </div>
+  </div>
+</section>
 {% endblock %}

@@ -1,14 +1,112 @@
 {% extends "base.html" %}{% block title %}Supplier Dashboard{% endblock %}
-{% block content %}<h2>Supplier Dashboard</h2>
+{% block content %}<h2>Supplier Dashboard{% if user.role == 'admin' %} (view only){% endif %}</h2>
 <div class="cards">{% for label, n, c in stats %}<div class="stat {{ c }}"><b>{{ n }}</b><span>{{ label }}</span></div>{% endfor %}</div>
-<div class="section-head"><h3>Priority supply alerts</h3><span class="muted">{{ supply_total }} active{% if supply_total > supply|length %}, showing the {{ supply|length }} most urgent{% endif %}. Items matching your categories are listed first within each severity.</span></div>
+
+<!-- ==========================================================================
+     Supplier Stock Management Section
+     ========================================================================== -->
+<div class="panel" id="stock-management">
+  <div class="section-head" style="margin-bottom:1rem">
+    <h3>Available Medical Stock Inventory ({{ my_stock|length }})</h3>
+    <span class="muted">Manage your available medical supplies. These listings are directly searchable by hospitals.</span>
+  </div>
+
+  {% if user.role != 'admin' %}
+  <details style="margin-bottom:1.5rem;background:#f8fafc;padding:1rem;border-radius:var(--radius-md);border:1px solid var(--line);">
+    <summary style="font-weight:700;color:var(--acc);cursor:pointer;display:inline-flex;align-items:center;gap:.5rem;">
+      <span style="font-size:1.1rem;line-height:1;">+</span> Add New Medical Stock Listing
+    </summary>
+    <form method="post" action="{{ url_for('provider_inventory_add') }}" style="margin-top:1rem">
+      <div class="form-grid">
+        <label>Item name<input name="item_name" placeholder="e.g. Paracetamol, Oxygen Cylinder, Insulin" required></label>
+        <label>Category
+          <select name="category" required>
+            <option value="">Select category</option>
+            {% for c in categories %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+          </select>
+        </label>
+        <label>Available quantity<input type="number" name="quantity" min="0" value="100" required></label>
+        <label>Unit<input name="unit" placeholder="e.g. tablets, vials, cylinders, units" value="units"></label>
+        <label>Batch number<input name="batch_number" placeholder="Optional e.g. B-OXY-01"></label>
+        <label>Expiry date<input type="date" name="expiry_date" min="{{ min_expiry_date }}"></label>
+        <label class="full">Description<textarea name="description" rows="2" placeholder="Item description, grade, concentration, or packaging details"></textarea></label>
+        <label class="full"><input type="checkbox" id="is_cold_chain" name="is_cold_chain" style="width:auto"> Cold-chain storage required</label>
+        <div class="form-grid full" id="cold-fields" hidden>
+          <label>Minimum temperature (°C)<input type="number" step="0.1" name="min_temperature" placeholder="e.g. 2.0"></label>
+          <label>Maximum temperature (°C)<input type="number" step="0.1" name="max_temperature" placeholder="e.g. 8.0"></label>
+          <label>Current temperature (°C)<input type="number" step="0.1" name="current_temperature" placeholder="e.g. 4.5"></label>
+        </div>
+      </div>
+      <p style="margin-top:1rem"><button class="btn">Add to available stock</button></p>
+    </form>
+  </details>
+  {% endif %}
+
+  <table>
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Category</th>
+        <th>Available Stock</th>
+        <th>Batch / Expiry</th>
+        <th>Cold Chain</th>
+        {% if user.role != 'admin' %}<th>Actions</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in my_stock %}
+      <tr>
+        <td><b>{{ item.item_name }}</b>{% if item.description %}<br><small class="muted">{{ item.description }}</small>{% endif %}</td>
+        <td>{{ item.category }}</td>
+        <td>
+          {% if user.role != 'admin' %}
+          <form method="post" action="{{ url_for('provider_inventory_update', id=item.id) }}" style="display:inline-flex;align-items:center;gap:.4rem;">
+            <input type="number" name="quantity" min="0" value="{{ item.quantity }}" style="width:80px;padding:.3rem .5rem;" aria-label="Available stock">
+            <button class="btn sm update" title="Update quantity">Update</button>
+            <small class="muted">{{ item.unit or 'units' }}</small>
+          </form>
+          {% else %}
+          <b>{{ item.quantity }}</b> <small class="muted">{{ item.unit or 'units' }}</small>
+          {% endif %}
+        </td>
+        <td>
+          {% if item.batch_number %}<small>Batch: {{ item.batch_number }}</small><br>{% endif %}
+          <small class="muted">{{ item.expiry_date or 'No expiry date' }}</small>
+        </td>
+        <td>
+          {% if item.is_cold_chain %}
+            <span class="badge safe">Cold-chain ({{ item.min_temperature }}°C–{{ item.max_temperature }}°C)</span>
+          {% else %}
+            <span class="muted">Standard</span>
+          {% endif %}
+        </td>
+        {% if user.role != 'admin' %}
+        <td class="actions">
+          <a class="btn sm update" href="{{ url_for('provider_inventory_edit', id=item.id) }}">Edit</a>
+          <form method="post" action="{{ url_for('provider_inventory_delete', id=item.id) }}" style="display:inline" onsubmit="return confirm('Remove stock listing for {{ item.item_name|e }}?')">
+            <button class="btn sm danger">Remove</button>
+          </form>
+        </td>
+        {% endif %}
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="{% if user.role != 'admin' %}6{% else %}5{% endif %}" style="text-align:center;padding:1.5rem;color:var(--muted);">
+          No stock listings added yet. Click <b>+ Add New Medical Stock Listing</b> above to list items for hospitals to search and request.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="section-head"><h3>Priority supply alerts</h3><span class="muted">{{ supply_total }} active{% if supply_total > supply|length %}, showing the {{ supply|length }} most urgent{% endif %}. Items matching supplier categories are listed first within each severity.</span></div>
 <div class="alert-grid">{% for a in supply %}<div class="acard {{ a.sev|lower }}"><div class="ahead">{{ badge(a.sev) }}<span class="muted">{{ a.kind }}</span>{% if a.due %}<span class="chip {{ 'hot' if a.due in ['Overdue','Due today'] }}">{{ a.due }}</span>{% endif %}</div>
-<h4>{{ a.item }}</h4><div class="muted">{{ a.hospital }}</div>
-{% if a.qty %}<div class="need"><b>{{ a.qty }}</b> to supply</div>{% endif %}<p>{{ a.detail }}</p>
-<div class="afoot">{% if a.match %}<span class="chip ok">Matches your categories</span>{% endif %}{% if a.action %}<a class="btn sm" href="{{ url_for('provider_requests') }}">{{ a.action }}</a>{% endif %}</div></div>
+<h4>{{ a.item }}</h4><div class="muted">{{ a.hospital }}</div>{% if a.qty %}<div class="need"><b>{{ a.qty }}</b> to supply</div>{% endif %}<p>{{ a.detail }}</p>
+<div class="afoot">{% if a.match %}<span class="chip ok">Matches supplier categories</span>{% endif %}{% if a.action and user.role != 'admin' %}<a class="btn sm" href="{{ url_for('provider_requests') }}">{{ a.action }}</a>{% endif %}</div></div>
 {% else %}<div class="panel">No urgent supply needs right now.</div>{% endfor %}</div>
 <div class="panel"><h3>Available hospital requirements</h3><table><tr><th>Hospital</th><th>Item</th><th>Category</th><th>Still needed</th><th>Priority</th><th>Required by</th></tr>
 {% for r in open_reqs %}<tr class="{{ (r.priority or '')|lower }}"><td>{{ r.hospital.org }}</td><td>{{ r.item_name }}</td><td>{{ r.category }}</td><td>{{ r.shortfall }}</td><td>{{ badge(r.priority) }}</td><td>{{ r.required_by or '' }}</td></tr>{% else %}<tr><td colspan="6">No open requirements.</td></tr>{% endfor %}</table></div>
 <div class="panel"><h3>Recent supply requests</h3><table><tr><th>Hospital</th><th>Item</th><th>Qty</th><th>Priority</th><th>Status</th></tr>
 {% for r in mine %}<tr><td>{{ r.hospital.org }}</td><td>{{ r.item_name }}</td><td>{{ r.requested_quantity }}</td><td>{{ badge(r.priority) }}</td><td>{{ badge(r.status) }}</td></tr>{% else %}<tr><td colspan="5">No requests yet.</td></tr>{% endfor %}</table>
-<p><a class="btn" href="{{ url_for('provider_requests') }}">Manage requests</a></p></div>{% endblock %}
+{% if user.role != 'admin' %}<p><a class="btn" href="{{ url_for('provider_requests') }}">Manage requests</a></p>{% endif %}</div>{% endblock %}

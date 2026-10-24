@@ -1,10 +1,252 @@
-{% extends "base.html" %}{% block title %}Supply Requests{% endblock %}
-{% block content %}<h2>Supply Requests</h2>
-<form class="panel" method="post"><h3>Send a request to a supplier</h3><div class="form-grid">
-<label>Supplier<select name="supplier_id" required><option value="">Choose supplier</option>{% for s in suppliers %}<option value="{{ s.id }}">{{ s.org }}</option>{% endfor %}</select></label>
-<label>Requirement (optional)<select name="requirement_id"><option value="">None</option>{% for r in reqs %}<option value="{{ r.id }}">{{ r.item_name }} (needs {{ r.shortfall }})</option>{% endfor %}</select></label>
-<label>Item (blank = from requirement)<input name="item_name"></label><label>Quantity (blank = shortfall)<input type="number" name="requested_quantity" min="1"></label>
-<label>Required date<input type="date" name="required_date"></label></div><p><button class="btn">Send request</button></p></form>
-<div class="panel"><table><tr><th>Item</th><th>Supplier</th><th>Requested</th><th>Supplied</th><th>Priority</th><th>Requested on</th><th>Required by</th><th>Status</th><th>Supplier response</th></tr>
-{% for r in rows %}<tr><td>{{ r.item_name }}</td><td>{{ r.supplier.org }}</td><td>{{ r.requested_quantity }}</td><td>{{ r.supplied_quantity or 0 }}</td><td>{{ badge(r.priority) }}</td>
-<td>{{ r.request_date.strftime('%d %b %Y') }}</td><td>{{ r.required_date or '' }}</td><td>{{ badge(r.status) }}</td><td>{{ r.supplier_response or '' }}</td></tr>{% else %}<tr><td colspan="9">No supply requests yet.</td></tr>{% endfor %}</table></div>{% endblock %}
+{% extends "base.html" %}{% block title %}Supply Requests & Stock Search{% endblock %}
+{% block content %}
+<h2>Supply Requests & Supplier Stock Search</h2>
+
+<!-- ==========================================================================
+     1. Search Registered Supplier Stock
+     ========================================================================== -->
+<div class="panel stock-search-panel">
+  <h3>Search Registered Supplier Stock</h3>
+  <p class="muted">Search for medical items across verified registered suppliers to check live availability, review contact details, and request supplies directly.</p>
+  <form method="get" action="{{ url_for('requests_page') }}#stock-search-results">
+    <div class="form-grid">
+      <label>Medical item name
+        <input name="q" placeholder="e.g. Paracetamol, Oxygen Cylinder, Vaccine" value="{{ search_q }}">
+      </label>
+      <label>Category
+        <select name="category">
+          <option value="">All Categories</option>
+          {% for c in categories %}
+          <option value="{{ c }}" {{ 'selected' if search_cat == c }}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Required quantity
+        <input type="number" name="needed_qty" min="1" placeholder="e.g. 50" value="{{ needed_qty or '' }}">
+      </label>
+    </div>
+    <p style="margin-top:1rem;display:flex;gap:.5rem;align-items:center;">
+      <button class="btn" type="submit">Search Supplier Stock</button>
+      {% if searched %}
+      <a class="btn sec" href="{{ url_for('requests_page') }}">Clear Search</a>
+      {% endif %}
+    </p>
+  </form>
+</div>
+
+<!-- ==========================================================================
+     2. Supplier Stock Search Results
+     ========================================================================== -->
+{% if searched %}
+<div class="panel" id="stock-search-results">
+  <div class="section-head">
+    <h3>Matching Supplier Stock ({{ supplier_stocks|length }} found)</h3>
+    <span class="muted">
+      Filtered by {% if search_q %}Item: "<b>{{ search_q }}</b>"{% endif %}
+      {% if search_cat %} Category: "<b>{{ search_cat }}</b>"{% endif %}
+      {% if needed_qty %} Required: <b>{{ needed_qty }}</b>{% endif %}
+    </span>
+  </div>
+
+  {% if supplier_stocks %}
+  <table class="search-results-table">
+    <thead>
+      <tr>
+        <th>Medical Item</th>
+        <th>Category</th>
+        <th>Supplier</th>
+        <th>Available Stock</th>
+        <th>Stock Status</th>
+        <th>Supplier Contact</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in supplier_stocks %}
+      <tr>
+        <td>
+          <b>{{ s.item_name }}</b>
+          {% if s.batch_number %}<br><small class="muted">Batch: {{ s.batch_number }}</small>{% endif %}
+          {% if s.expiry_date %}<br><small class="muted">Exp: {{ s.expiry_date }}</small>{% endif %}
+        </td>
+        <td>{{ s.category }}</td>
+        <td><b>{{ s.hospital.org }}</b></td>
+        <td>
+          <b style="font-size:1.05rem;color:var(--acc);">{{ s.quantity }}</b>
+          <span class="muted">{{ s.unit or 'units' }}</span>
+        </td>
+        <td>
+          {% if needed_qty %}
+            {% if s.is_sufficient %}
+              <span class="badge sufficient">✓ Sufficient Stock ({{ s.quantity }} &ge; {{ needed_qty }})</span>
+            {% else %}
+              <span class="badge partial">⚠ Partial Stock ({{ s.quantity }} of {{ needed_qty }} needed)</span>
+            {% endif %}
+          {% else %}
+            <span class="badge safe">{{ s.quantity }} Available</span>
+          {% endif %}
+        </td>
+        <td class="supplier-contact-cell">
+          {% if s.hospital.phone %}<span>📞 {{ s.hospital.phone }}</span>{% endif %}
+          {% if s.hospital.email %}<span>✉ {{ s.hospital.email }}</span>{% endif %}
+          {% if s.hospital.address %}<span>📍 {{ s.hospital.address }}</span>{% endif %}
+        </td>
+        <td>
+          <button type="button" class="btn sm"
+            onclick="selectSupplierStock('{{ s.hospital.id }}', '{{ s.item_name|e }}', {{ s.quantity }}, {{ needed_qty if (needed_qty and needed_qty <= s.quantity) else s.quantity }})">
+            Select & Request
+          </button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-stock-notice">
+    <h4 style="margin:0 0 0.5rem;color:var(--critical);">No Registered Suppliers Have Matching Stock</h4>
+    <p style="margin:0;">No registered suppliers currently have available stock matching <b>"{{ search_q or search_cat }}"</b>{% if needed_qty %} with the requested quantity{% endif %}. You can still submit a custom request below, check back later, or request emergency inter-hospital sharing.</p>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- ==========================================================================
+     3. Direct Supply Request Form
+     ========================================================================== -->
+<form class="panel" id="request-form" method="post">
+  <h3>Send a request to a supplier</h3>
+  <div class="form-grid">
+    <label>Supplier
+      <select name="supplier_id" id="form-supplier-id" required>
+        <option value="">Choose supplier</option>
+        {% for s in suppliers %}
+        <option value="{{ s.id }}" {{ 'selected' if prefill.get('supplier_id')|int == s.id }}>{{ s.org }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Requirement (optional)
+      <select name="requirement_id" id="form-requirement-id">
+        <option value="">None</option>
+        {% for r in reqs %}
+        <option value="{{ r.id }}" data-item="{{ r.item_name }}" data-shortfall="{{ r.shortfall }}">{{ r.item_name }} (needs {{ r.shortfall }})</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Item (blank = from requirement)
+      <input name="item_name" id="form-item-name" value="{{ prefill.get('item_name', '') }}">
+    </label>
+    <label>Quantity (blank = shortfall)
+      <input type="number" name="requested_quantity" id="form-requested-quantity" min="1" value="{{ prefill.get('requested_quantity', needed_qty or '') }}">
+    </label>
+    <label>Required date
+      <input type="date" name="required_date" id="form-required-date" value="{{ prefill.get('required_date', '') }}">
+    </label>
+  </div>
+  <p><button class="btn" type="submit">Send request</button></p>
+</form>
+
+<!-- ==========================================================================
+     4. Submitted Requests History & Tracking
+     ========================================================================== -->
+<div class="panel">
+  <h3>Submitted Supply Requests</h3>
+  <table>
+    <tr>
+      <th>Item</th>
+      <th>Supplier</th>
+      <th>Requested</th>
+      <th>Supplied</th>
+      <th>Priority</th>
+      <th>Requested on</th>
+      <th>Required by</th>
+      <th>Status</th>
+      <th>Supplier response</th>
+      <th>Actions</th>
+    </tr>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.item_name }}</td>
+      <td>{{ r.supplier.org }}</td>
+      <td>{{ r.requested_quantity }}</td>
+      <td>{{ r.supplied_quantity or 0 }}</td>
+      <td>{{ badge(r.priority) }}</td>
+      <td>{{ r.request_date.strftime('%d %b %Y') }}</td>
+      <td>
+        {{ r.required_date or '' }}
+        {% if r.status == 'PENDING' and r.expires_at %}
+        <br><small class="muted">Respond by {{ r.expires_at.strftime('%d %b %H:%M') }}</small>
+        {% endif %}
+      </td>
+      <td>
+        {{ badge(r.status) }}
+        {% if r.status == 'RECEIVED' %}
+        <br><small class="muted">Inventory updated: +{{ r.supplied_quantity or 0 }} units</small>
+        {% endif %}
+      </td>
+      <td>{{ r.supplier_response or '' }}</td>
+      <td class="actions">
+        {% if r.status == 'PENDING' and user.role == 'hospital' %}
+          <a class="btn sm update" href="{{ url_for('supply_request_edit', id=r.id) }}">Edit</a>
+          <form method="post" action="{{ url_for('supply_request_cancel', id=r.id) }}" onsubmit="return confirm('Cancel this pending supply request?')">
+            <button class="btn sm warning">Cancel</button>
+          </form>
+        {% elif r.status == 'FULFILLED' and user.role == 'hospital' %}
+          <form method="post" action="{{ url_for('supply_request_receive', id=r.id) }}" onsubmit="return confirm('Confirm receipt and add {{ r.supplied_quantity or 0 }} units to inventory?')">
+            <button class="btn sm success">Receive stock</button>
+          </form>
+        {% elif r.status == 'RECEIVED' %}
+          <span class="btn sm success" aria-label="Stock receipt complete">Stock received ✓</span>
+        {% elif r.status in ['REJECTED','TIMEOUT','CANCELLED'] and user.role == 'hospital' %}
+          <form method="post" action="{{ url_for('supply_request_delete', id=r.id) }}" onsubmit="return confirm('Delete this request from your history?')">
+            <button class="btn sm danger">Delete</button>
+          </form>
+        {% else %}
+          <span class="muted">View</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="10">No supply requests yet.</td></tr>
+    {% endfor %}
+  </table>
+</div>
+
+<script>
+function selectSupplierStock(supplierId, itemName, maxStock, suggestedQty) {
+  const supSelect = document.getElementById("form-supplier-id");
+  const itemInput = document.getElementById("form-item-name");
+  const qtyInput = document.getElementById("form-requested-quantity");
+  const reqForm = document.getElementById("request-form");
+
+  if (supSelect) supSelect.value = supplierId;
+  if (itemInput) itemInput.value = itemName;
+  if (qtyInput) {
+    qtyInput.value = suggestedQty || maxStock;
+    qtyInput.max = maxStock;
+  }
+
+  if (reqForm) {
+    reqForm.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (qtyInput) qtyInput.focus();
+  }
+}
+
+// Auto-fill from requirement selection
+const reqSelect = document.getElementById("form-requirement-id");
+if (reqSelect) {
+  reqSelect.addEventListener("change", function() {
+    const opt = this.options[this.selectedIndex];
+    if (opt && opt.value) {
+      const itm = opt.getAttribute("data-item");
+      const short = opt.getAttribute("data-shortfall");
+      if (itm) document.getElementById("form-item-name").value = itm;
+      if (short) document.getElementById("form-requested-quantity").value = short;
+    }
+  });
+}
+</script>
+
+{% if rows|selectattr('status', 'equalto', 'PENDING')|list %}
+<script>window.setTimeout(() => window.location.reload(), 10000);</script>
+{% endif %}
+{% endblock %}
