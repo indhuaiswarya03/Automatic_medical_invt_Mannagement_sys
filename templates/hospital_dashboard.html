@@ -86,13 +86,16 @@
         <td>{{ i.category }}</td>
         <td><b>{{ i.quantity }}</b> {{ i.unit or 'units' }}</td>
         <td>{{ i.minimum_quantity }}</td>
-        <td><span class="meter"><i class="{{ i.priority|lower }}" style="width:{{ [i.pct,100]|min }}%"></i></span>{{ i.pct }}%</td>
+        <td><span class="meter"><i class="{{ i.priority|lower }}" style="width:{{ [i.pct,100]|min }}%"></i></span>{{
+          i.pct }}%</td>
         <td>{{ badge(i.priority) }}</td>
         <td><small class="muted">{{ i.priority_reason }}</small></td>
         {% if user.role != 'admin' %}
         <td>
           {% if i.priority in ['CRITICAL', 'LOW'] %}
-          <a class="btn sm update" href="{{ url_for('requests_page') }}?q={{ i.item_name|urlencode }}&needed_qty={{ [i.minimum_quantity - i.quantity, 1]|max }}">Search Suppliers</a>
+          <a class="btn sm update"
+            href="{{ url_for('requests_page') }}?q={{ i.item_name|urlencode }}&needed_qty={{ [i.minimum_quantity - i.quantity, 1]|max }}">Search
+            Suppliers</a>
           {% else %}
           <span class="muted">Sufficient</span>
           {% endif %}
@@ -100,7 +103,10 @@
         {% endif %}
       </tr>
       {% else %}
-      <tr><td colspan="8">No inventory items found.{% if user.role != 'admin' %} <a href="{{ url_for('inventory_add') }}">Add your first item</a>{% endif %}</td></tr>
+      <tr>
+        <td colspan="8">No inventory items found.{% if user.role != 'admin' %} <a
+            href="{{ url_for('inventory_add') }}">Add your first item</a>{% endif %}</td>
+      </tr>
       {% endfor %}
     </tbody>
   </table>
@@ -148,8 +154,10 @@
         <td>
           {% set rec = near_expiry_recommendations|selectattr('item.id', 'equalto', ne.id)|first %}
           {% if rec %}
-          <span style="color:var(--acc);">Transfer {{ rec.recommended_qty }} units to <b>{{ rec.target_hospital.org }}</b></span>
-          <a class="btn sm" href="{{ url_for('inter_hospital_sharing') }}?provider_id={{ rec.target_hospital.id }}">Share Stock</a>
+          <span style="color:var(--acc);">Transfer {{ rec.recommended_qty }} units to <b>{{ rec.target_hospital.org
+              }}</b></span>
+          <a class="btn sm"
+            href="{{ url_for('inter_hospital_sharing') }}?provider_id={{ rec.target_hospital.id }}">Share Stock</a>
           {% else %}
           Prioritize for clinical dispensing or mark for inter-hospital sharing.
           {% endif %}
@@ -249,8 +257,9 @@
 {% if report or demand_estimates %}
 <div class="panel">
   <div class="section-head">
-    <h3>Deterministic Rule-Based Demand Estimation (No AI/ML)</h3>
-    <span class="muted">Calculated from historical emergency requirements, fulfilled supplier shipments, and inter-hospital transfers</span>
+    <h3> Demand Estimation </h3>
+    <span class="muted">Calculated from historical emergency requirements, fulfilled supplier shipments, and
+      inter-hospital transfers</span>
   </div>
   <table>
     <thead>
@@ -283,7 +292,9 @@
         </td>
       </tr>
       {% else %}
-      <tr><td colspan="7">No inventory items available for demand calculation.</td></tr>
+      <tr>
+        <td colspan="7">No inventory items available for demand calculation.</td>
+      </tr>
       {% endfor %}
     </tbody>
   </table>
@@ -295,7 +306,14 @@
   <h3>Emergency Requirements Audit Log</h3>
   <table>
     <thead>
-      <tr><th>Item</th><th>Required</th><th>Available</th><th>Shortfall</th><th>Priority</th><th>Status</th></tr>
+      <tr>
+        <th>Item</th>
+        <th>Required</th>
+        <th>Available</th>
+        <th>Shortfall</th>
+        <th>Priority</th>
+        <th>Status</th>
+      </tr>
     </thead>
     <tbody>
       {% for r in reqs %}
@@ -308,7 +326,9 @@
         <td>{{ badge(r.status) }}</td>
       </tr>
       {% else %}
-      <tr><td colspan="6">No requirements recorded.</td></tr>
+      <tr>
+        <td colspan="6">No requirements recorded.</td>
+      </tr>
       {% endfor %}
     </tbody>
   </table>
